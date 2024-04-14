@@ -1,0 +1,51 @@
+program = {statement};
+statement = assignment | classdef | field | traitdef | answer | pragma | tempdecl | expression '.';
+
+pragma = "@" message;
+answer = "^" expression ".";
+tempdecl = "var" identifier [":=" expression] ".";
+
+assignment = identifier ":=" expression ".";
+classdef = "class" identifier ["extending" identifier] ["implementing" identifier {"," identifier}] "is" {method | field | pragma} "end";
+traitdef = "trait" identifier ["extending" identifier] "is" {method | requirement | pragma} "end";
+
+field = ["static"] "var" identifier [":=" expression] ".";
+method = ["static"] "def" signature "as" {statement} "end";
+requirement = "require" signature ".";
+
+signature = unarySignature | binarySignature | kwordSignature;
+unarySignature = identifier;
+binarySignature = binop identifier;
+kwordSignature = {identifier ":" identifier};
+
+expression = keywordExpression {cascade};
+cascade = ";" message;
+
+message = keywordMessage | binaryMessage | unaryMessage;
+
+keywordExpression = binaryExpression [keywordMessage];
+keywordMessage = {identifier ":" binaryExpression};
+
+binaryExpression = unaryExpression {binaryMessage};
+binaryMessage = binop unaryExpression;
+
+unaryExpression = value {unaryMessage};
+unaryMessage = identifier;
+
+value = literal | array | identifier | '(' expression ')' | block | chain;
+
+block = '[' [header] {statement} ']';
+header = ":" {identifier} "|";
+
+array = "{" [expression {"," expression}] "}";
+
+chain = "#" "(" expression {"," expression} ")";
+
+literal = string | number | symbol | bytearray;
+bytearray = "#" "[" {byte} "]";
+
+// token string = "([^"]|"")+"
+// token number = [-+]?\d+(\.\d+)?([eE][-+]\d+)?
+// token symbol = #\w+
+// token identifier = [a-zA-Z_][a-zA-Z0-9_]* 
+// token binop = [-+/*=<>!]+
