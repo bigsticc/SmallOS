@@ -20,7 +20,6 @@ class Context:
     def peek(self):
         return self.tokens[self.pos].kind
     
-    
     def lookahead(self):
         return self.tokens[self.pos+1].kind
     

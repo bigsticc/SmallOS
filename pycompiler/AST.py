@@ -41,8 +41,3 @@ Program = namedtuple('Program', 'statements')
 
 AST = Union[Program, Statement, Member, Expression, Message, Value]
 BlockContext = Union[Program, Method, Block]
-
-def inUnion(_type, union):
-    print("In Union called with:", _type)
-    return _type in union.__args__
-
