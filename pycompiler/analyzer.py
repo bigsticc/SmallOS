@@ -1,4 +1,4 @@
-from ast import *
+from AST import *
 from typing import Union
 
 def trim_block(AST: BlockContext):
@@ -22,7 +22,7 @@ def trim_block(AST: BlockContext):
 
 
 if __name__ == '__main__':
-    from parser import parse
+    from stparse import parse
     from lexer import tokenize
     from sys import argv
     
