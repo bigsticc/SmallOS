@@ -35,7 +35,7 @@ TraitDef = namedtuple('TraitDef', 'name parent_trait members')
 ClassDef = namedtuple('ClassDef', 'name parent_class traits members')
 Assignment = namedtuple('Assignment', 'name value')
 TempDecl = namedtuple('TempDecl', 'name value')
-Statement = Union[Assignment, ClassDef, TraitDef, Answer, Pragma]
+Statement = Union[Assignment, ClassDef, TraitDef, TempDecl, Answer, Pragma]
 
 Program = namedtuple('Program', 'statements')
 
