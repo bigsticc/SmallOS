@@ -21,6 +21,17 @@ def trim_block(AST: BlockContext):
 
 
 
+def analyze_program(AST: Program):
+    new = toSSA(AST)
+    
+    while has_const(AST):
+        new = constFold(AST)
+        new = constProp(AST)
+    
+    new = dropDead(AST)
+    
+    return new
+
 if __name__ == '__main__':
     from stparse import parse
     from lexer import tokenize
