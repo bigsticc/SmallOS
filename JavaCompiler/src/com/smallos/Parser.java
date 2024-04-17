@@ -56,6 +56,16 @@ public class Parser {
         if(ctx.peek("ID") && ctx.lookahead("ASSIGN")) return assignment(ctx);
         else if(ctx.peek("VAR")) return tempDecl(ctx);
         else if(ctx.peek("CLASS")) return classDef(ctx);
+        else if(ctx.peek("TRAIT")) return traitDef(ctx);
+        else if(ctx.peek("ANSWER")) return answer(ctx);
+        else if(ctx.peek("AT")) return pragma(ctx);
+        else if(ctx.peek("ID") || ctx.peek("LBRACE") || ctx.peek("LBRACKET") || ctx.peek("HASH") || ctx.peek("STRING") || ctx.peek("NUMBER") || ctx.peek("SYMBOL") || ctx.peek("TRUE") || ctx.peek("FALSE") || ctx.peek("NIL") || ctx.peek("LPAREN")) {
+            Expr value = expression(ctx);
+            ctx.expect("PERIOD", "Statements must end with a period.");
+            return value;
+        } else {
+            ctx.error("Expected statement.")
+        }
     }
     
     private static AST.Program program(Context ctx) {
