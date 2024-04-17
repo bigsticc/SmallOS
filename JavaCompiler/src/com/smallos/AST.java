@@ -41,8 +41,8 @@ public interface AST {
     public static interface Stmt extends Node {}
     public static record Pragma(Message value) implements Stmt, Member;
     public static record Answer(Expr value) implements Stmt;
-    public static record TraitDef(String name, Identifier parentTrait, List<Member> members) implements Stmt;
-    public static record ClassDef(String name, Identifier parentClass, List<Identifier> traits, List<Member> members) implements Stmt;
+    public static record TraitDef(String name, Identifier parent, List<Member> members) implements Stmt;
+    public static record ClassDef(String name, Identifier parent, List<Identifier> traits, List<Member> members) implements Stmt;
     public static record Assignment(Identifier name, Expr value) implements Stmt;
     public static record TempDecl(Identifier name, Expr value) implements Stmt;
     
