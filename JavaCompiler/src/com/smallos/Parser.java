@@ -52,6 +52,14 @@ public class Parser {
     }
     
     // Parser functions
+    
+    // Statement
+    private static AST.Pragma pragma(Context ctx) {
+        ctx.expect("AT");
+        AST.Expr val = expression(ctx);
+        return new AST.Pragma(val);
+    }
+    
     private static AST.Answer answer(Context ctx) {
         ctx.expect("ANSWER");
         AST.Expr val = expression(ctx);
