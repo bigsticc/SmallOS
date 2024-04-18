@@ -2,14 +2,15 @@ package com.smallos;
 import java.util.regex.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Lexer {
-    public static record Token(int lineNum, String type, Object value) {};
+    public static record Token(int lineNum, String type, String value) {};
     
-    final String regex = "(?<COMMENT>\\/\\/.*$)|(?<SYMBOL>#[a-zA-Z_$][a-zA-Z_$0-9]*)|(?<ASSIGN>:=)|(?<PERIOD>\\.)|(?<COLON>:)|(?<SEMICOLON>;)|(?<COMMA>,)|(?<HASH>#)|(?<LPAREN>\\()|(?<RPAREN>\\))|(?<LBRACKET>\\[)|(?<RBRACKET>\\])|(?<LBRACE>\\{)|(?<RBRACE>\\})|(?<ANSWER>\\^)|(?<PIPE>\\|)|(?<AT>@)|(?<STRING>\\\"(?:[^\\\"]|\\\"\\\")+\\\")|(?<BYTE>x[0-9A-Fa-f]{2})|(?<NUMBER>[-+]?\\d+(?:\\.\\d+)?)|(?<ID>[a-zA-Z_][a-zA-Z0-9_]*)|(?<BINOP>[-+/*=<>!]+)|(?<NEWLINE>\\n)|(?<SKIP>[ \\t]+)|(?<MISMATCH>.)";
-    final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+    final static String regex = "(?<COMMENT>\\/\\/.*$)|(?<SYMBOL>#[a-zA-Z_$][a-zA-Z_$0-9]*)|(?<ASSIGN>:=)|(?<PERIOD>\\.)|(?<COLON>:)|(?<SEMICOLON>;)|(?<COMMA>,)|(?<HASH>#)|(?<LPAREN>\\()|(?<RPAREN>\\))|(?<LBRACKET>\\[)|(?<RBRACKET>\\])|(?<LBRACE>\\{)|(?<RBRACE>\\})|(?<ANSWER>\\^)|(?<PIPE>\\|)|(?<AT>@)|(?<STRING>\\\"(?:[^\\\"]|\\\"\\\")+\\\")|(?<BYTE>x[0-9A-Fa-f]{2})|(?<NUMBER>[-+]?\\d+(?:\\.\\d+)?)|(?<ID>[a-zA-Z_][a-zA-Z0-9_]*)|(?<BINOP>[-+/*=<>!]+)|(?<NEWLINE>\\n)|(?<SKIP>[ \\t]+)|(?<MISMATCH>.)";
+    final static Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
-    final String[] keywords = {"class", "trait", "extending", "implementing", "is", "as", "static", "var", "def", "end", "require", "true", "false", "nil"};
+    final static String[] keywords = {"class", "trait", "extending", "implementing", "is", "as", "static", "var", "def", "end", "require", "true", "false", "nil"};
     
     private static String findGroupName(Matcher matcher) {
         for (String groupName : new String[] {"COMMENT", "SYMBOL", "ASSIGN", "PERIOD", "COLON", "SEMICOLON", "COMMA", "HASH", "LPAREN", "RPAREN", "LBRACKET", "RBRACKET", "LBRACE", "RBRACE", "ANSWER", "PIPE", "AT", "STRING", "BYTE", "NUMBER", "ID", "BINOP", "NEWLINE", "SKIP", "MISMATCH"}) {
@@ -17,9 +18,10 @@ public class Lexer {
                 return groupName;
             }
         }
+        throw new IllegalStateException("Unknown lexer state.");
     }
     
-    public static Token[] tokenize(String text) {
+    public static List<Token> tokenize(String text) {
         ArrayList<Token> tokens = new ArrayList<>();
         Matcher m = pattern.matcher(text);
         
@@ -44,6 +46,6 @@ public class Lexer {
         }
         tokens.add(new Token(line, "EOF", ""));
         
-        return tokens.toArray();
+        return tokens;
     }
 }
