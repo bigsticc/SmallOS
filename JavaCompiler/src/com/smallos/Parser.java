@@ -53,7 +53,47 @@ public class Parser {
     
     // Parser functions
     
-    // Statement
+    private static AST.Signature signature(Context ctx) {
+        
+    }
+    
+    private static AST.Method method(Context ctx) {
+        boolean isStatic = ctx.accept("STATIC") != null;
+        ctx.expect("DEF");
+        AST.Signature sig = signature(ctx);
+        ctx.expect("AS");
+        List<Stmt> statements = new ArrayList<>();
+        while(!ctx.accept("END")) {
+            statements.add(statement(ctx));
+        }
+        return new AST.Method(isStatic, sig, statements);
+    }
+    
+    private static AST.Field field(Context ctx) {
+        boolean isStatic = ctx.accept("STATIC") != null;
+        ctx.expect("VAR");
+        String name = ctx.expect("ID").value;
+        AST.Expr val = new AST.Nil();
+        if(ctx.accept("ASSIGN")) val = expression(ctx);
+        ctx.expect("PERIOD", "Statements must be ended with a period.");
+        return new AST.Field(isStatic, name, val);
+    }
+    
+    private static AST.Member member(Context ctx) {
+        if(ctx.peek("STATIC")) {
+            if(ctx.lookahead("DEF")) return method(ctx);
+            else if(ctx.lookahead("VAR")) return field(ctx);
+            else if(ctx.lookahead("REQUIRE")) ctx.error("Requirements cannot be static.");
+            else ctx.error("Expected method or field after 'static' token.");
+        } 
+        else if(ctx.peek("DEF")) return method(ctx);
+        else if(ctx.peek("VAR")) return field(ctx);
+        else if(ctx.peek("REQUIRE")) return require(ctx);
+        else if(ctx.peek("AT")) return pragma(ctx);
+        else ctx.error("Expected one of: method, field, requirement, pragma in class/trait body.");
+    }
+    
+    // Statements
     private static AST.Pragma pragma(Context ctx) {
         ctx.expect("AT");
         AST.Expr val = expression(ctx);
@@ -113,7 +153,7 @@ public class Parser {
         ctx.expect("VAR");
         String name = ctx.expect("ID").value;
         AST.Expr val = new AST.Nil();
-        if(ctx.accept("ASSIGN")) value = expression(ctx);
+        if(ctx.accept("ASSIGN")) val = expression(ctx);
         ctx.expect("PERIOD", "Statements must be ended with a period.");
         return new AST.TempDecl(name, val);
     }
