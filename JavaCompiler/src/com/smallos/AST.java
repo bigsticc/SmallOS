@@ -11,7 +11,7 @@ public interface AST {
     public static record Symbol(String value) implements Value {}
     public static record Num(Number value) implements Value {}
     public static record Str(String value) implements Value {}
-    public static record ByteBlock(byte[] value) implements Value {}
+    public static record ByteBlock(Byte[] value) implements Value {}
     public static record Identifier(String name) implements Value {}
     public static record Chain(List<Expr> values) implements Value {}
     public static record Block(List<Identifier> args, List<Stmt> statements) implements Value {}
