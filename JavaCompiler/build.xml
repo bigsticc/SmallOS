@@ -15,7 +15,7 @@
     <!-- Test Path -->
     <path id="test.path">
         <fileset dir="${lib.test.dir}"/>
-        <fileset dir="${classes.dir}" />
+        <pathelement location="${classes.dir}"/>
     </path>
     
     <!-- Compile target -->
@@ -25,13 +25,15 @@
     </target>
 
     <!-- Compile Test target -->
-    <target name="compileTest" description="Compile all java test files to build/tests">
+    <target name="compileTest" depends="compile" description="Compile all java test files to build/tests">
         <mkdir dir="${tests.dir}"/>
-        <javac srcdir="${test.dir}" destdir="${tests.dir}" includeantruntime="false"/>
+        <javac srcdir="${test.dir}" destdir="${tests.dir}" includeantruntime="false" classpathref="test.path">
+            <compilerarg value="-Xlint:none"/>
+        </javac>
     </target>
 
     <!-- Run Test target -->
-    <target name="runTest" description="Execute tests in build/tests">
+    <target name="test" depends="compileTest" description="Execute tests in build/tests">
         <mkdir dir="${output.dir}"/>
         <mkdir dir="${reports.dir}"/>
         <junitlauncher>
