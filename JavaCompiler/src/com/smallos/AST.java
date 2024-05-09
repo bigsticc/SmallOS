@@ -27,7 +27,7 @@ public interface AST {
     public static record UnaryExpression(Value receiver, List<UnaryMessage> messages) implements Expr {}
     public static record BinaryExpression(UnaryExpression receiver, List<BinaryMessage> message) implements Expr {}
     public static record KeywordExpression(BinaryExpression receiver, KeywordMessage message) implements Expr {}
-    public static record Cascade(KeywordExpression primary, Message messages) implements Expr {}
+    public static record Cascade(AST.Expr primary, List<Message> messages) implements Expr {}
     
     public static interface Member extends Node {}
     public static record Requirement(Signature signature) implements Member {}
