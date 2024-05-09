@@ -5,7 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Lexer {
-    public static record Token(int lineNum, String type, String value) {};
+    public static record Token(int lineNum, String type, String value) {
+        public String toString() {
+            return String.format("(<%s> %s @ %s)", type, value, lineNum);
+        }
+    };
     
     final static String regex = "(?<COMMENT>\\/\\/.*$)|(?<SYMBOL>#[a-zA-Z_$][a-zA-Z_$0-9]*)|(?<ASSIGN>:=)|(?<PERIOD>\\.)|(?<COLON>:)|(?<SEMICOLON>;)|(?<COMMA>,)|(?<HASH>#)|(?<LPAREN>\\()|(?<RPAREN>\\))|(?<LBRACKET>\\[)|(?<RBRACKET>\\])|(?<LBRACE>\\{)|(?<RBRACE>\\})|(?<ANSWER>\\^)|(?<PIPE>\\|)|(?<AT>@)|(?<STRING>\\\"(?:[^\\\"]|\\\"\\\")+\\\")|(?<BYTE>x[0-9A-Fa-f]{2})|(?<NUMBER>[-+]?\\d+(?:\\.\\d+)?)|(?<ID>[a-zA-Z_][a-zA-Z0-9_]*)|(?<BINOP>[-+/*=<>!]+)|(?<NEWLINE>\\n)|(?<SKIP>[ \\t]+)|(?<MISMATCH>.)";
     final static Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
