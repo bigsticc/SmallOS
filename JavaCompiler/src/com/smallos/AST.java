@@ -16,6 +16,7 @@ public interface AST {
     public static record Chain(List<Expr> values) implements Value {}
     public static record Block(List<Identifier> args, List<Stmt> statements) implements Value {}
     public static record Array(List<Expr> values) implements Value {}
+    public static record NestedExpr(Expr expr) implements Value {}
     
     public static interface Message extends Node {}
     public static record UnaryMessage(String name) implements Message {}
