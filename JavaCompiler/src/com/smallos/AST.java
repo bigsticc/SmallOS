@@ -21,12 +21,12 @@ public interface AST {
     public static interface Message extends Node {}
     public static record UnaryMessage(String name) implements Message {}
     public static record BinaryMessage(String name, UnaryExpression argument) implements Message {}
-    public static record KeywordMessage(String name, Map<String, BinaryExpression> arguments) implements Message {}
+    public static record KeywordMessage(String name, Map<String, Expr> arguments) implements Message {}
     
     public static interface Expr extends Stmt {}
     public static record UnaryExpression(Value receiver, List<UnaryMessage> messages) implements Expr {}
-    public static record BinaryExpression(UnaryExpression receiver, List<BinaryMessage> message) implements Expr {}
-    public static record KeywordExpression(BinaryExpression receiver, KeywordMessage message) implements Expr {}
+    public static record BinaryExpression(Expr receiver, List<BinaryMessage> message) implements Expr {}
+    public static record KeywordExpression(Expr receiver, KeywordMessage message) implements Expr {}
     public static record Cascade(AST.Expr primary, List<Message> messages) implements Expr {}
     
     public static interface Member extends Node {}
