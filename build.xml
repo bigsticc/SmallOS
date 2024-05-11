@@ -1,0 +1,71 @@
+<project name="JComp" default="Execute" basedir=".">
+
+    <!-- Define properties -->
+    <property name="src.dir" value="src"/>
+    <property name="test.dir" value="test"/>
+    <property name="build.dir" value="build"/>
+    <property name="lib.test.dir" value="lib"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="tests.dir" value="${build.dir}/tests"/>
+    <property name="dist.dir" value="${build.dir}/dist"/>
+    <property name="output.dir" value="${build.dir}/output"/>
+    <property name="reports.dir" value="${build.dir}/reports"/>
+    <property name="jar.file" value="${dist.dir}/JComp.jar"/>
+
+    <!-- Test Path -->
+    <path id="test.path">
+        <fileset dir="${lib.test.dir}"/>
+        <pathelement location="${classes.dir}"/>
+    </path>
+    
+    <!-- Compile target -->
+    <target name="compile" description="Compile all java src files to build/classes">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false"/>
+    </target>
+
+    <!-- Compile Test target -->
+    <target name="compileTest" depends="compile" description="Compile all java test files to build/tests">
+        <mkdir dir="${tests.dir}"/>
+        <javac srcdir="${test.dir}" destdir="${tests.dir}" includeantruntime="false" classpathref="test.path">
+            <compilerarg value="-Xlint:none"/>
+        </javac>
+    </target>
+
+    <!-- Run Test target -->
+    <target name="test" depends="compileTest" description="Execute tests in build/tests">
+        <mkdir dir="${output.dir}"/>
+        <mkdir dir="${reports.dir}"/>
+        <junitlauncher>
+            <classpath refid="test.path"/>
+            <classpath>
+                <pathelement location="${tests.dir}"/>
+            </classpath>
+            <testclasses outputdir="${output.dir}">
+                <fileset dir="${tests.dir}"/>
+                <listener type="legacy-xml" sendSysErr="true" sendSysOut="true"/>
+            </testclasses>
+        </junitlauncher>
+        <junitreport todir="${reports.dir}">
+            <fileset dir="${output.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${reports.dir}"/>
+        </junitreport>
+    </target>
+
+    <!-- Package target -->
+    <target name="package" depends="compile" description="Package build/classes into .jar and output it in build/dist">
+        <mkdir dir="${dist.dir}"/>
+        <jar destfile="${jar.file}" basedir="${classes.dir}"/>
+    </target>
+
+    <!-- Execute target -->
+    <target name="execute" depends="package" description="Execute the latest .jar in build/dist">
+        <java jar="${jar.file}" fork="true"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+</project>
