@@ -20,7 +20,7 @@ public interface AST {
     
     public static interface Message extends Node {}
     public static record UnaryMessage(String name) implements Message {}
-    public static record BinaryMessage(String name, UnaryExpression argument) implements Message {}
+    public static record BinaryMessage(String name, Expr argument) implements Message {}
     public static record KeywordMessage(String name, Map<String, Expr> arguments) implements Message {}
     
     public static interface Expr extends Stmt {}

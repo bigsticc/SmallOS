@@ -15,10 +15,10 @@ public class Parser {
         }
         
         public boolean check(String type) {
-            return peek().type() == type;
+            return peek().type().equals(type);
         }
         public boolean lookahead(String type) {
-            return tokens.get(pos + 1).type() == type;
+            return tokens.get(pos + 1).type().equals(type);
         }
         
         public Lexer.Token accept(String type) {
@@ -51,7 +51,7 @@ public class Parser {
         }
         
         public void error(String message) {
-            throw new Error("Error while parsing line " + peek().lineNum() + ": " + message);
+            throw new SyntaxError("Error while parsing line " + peek().lineNum() + ": " + message + " latest token:" + peek());
         }
     }
     
@@ -71,25 +71,6 @@ public class Parser {
     
     private static AST.Identifier identifier(Context ctx) {
         return new AST.Identifier(ctx.expect("ID").value());
-    }
-    
-    private static AST.Chain chain(Context ctx) {
-        ctx.expect("HASH");
-        ctx.expect("LPAREN");
-        List<AST.Expr> expressions = new ArrayList<>();
-        
-        AST.Expr first = expression(ctx);
-        if(first == null) {
-            ctx.error("Expected expression");
-            return null;
-        }
-        expressions.add(first);
-
-        while(ctx.accept("COMMA") != null) {
-            expressions.add(first);
-        }
-
-        return new AST.Chain(expressions);
     }
     
     private static AST.ByteBlock byteBlock(Context ctx) {
@@ -144,13 +125,8 @@ public class Parser {
             return array(ctx);
         } else if(ctx.check("LBRACKET")) {
             return block(ctx);
-        } else if(ctx.check("HASH")) {
-            if(ctx.lookahead("LPAREN")) return chain(ctx);
-            else if(ctx.lookahead("LBRACKET")) return byteBlock(ctx);
-            else {
-                ctx.error("Expected chain or byte array after hash token.");
-                return null;
-            }
+        } else if(ctx.check("HASH") && ctx.lookahead("LBRACKET")) {
+            return byteBlock(ctx);
         } else if(ctx.check("STRING") || ctx.check("NUMBER") || ctx.check("SYMBOL") || ctx.check("TRUE") || ctx.check("FALSE") || ctx.check("NIL")) {
             return literal(ctx);
         } else if(ctx.check("LPAREN")) {
@@ -172,20 +148,20 @@ public class Parser {
     
     private static AST.BinaryMessage binaryMessage(Context ctx) {
         String name = ctx.accept("BINOP").value();
-        AST.UnaryExpression argument = (AST.UnaryExpression)unaryExpression(ctx);
+        AST.Expr argument = unaryExpression(ctx);
 
         return new AST.BinaryMessage(name, argument);
     }
     
     private static AST.KeywordMessage keywordMessage(Context ctx) {
         StringBuilder bob = new StringBuilder();
-        Map<String,AST.BinaryExpression> arguments = new HashMap<>();
+        Map<String,AST.Expr> arguments = new HashMap<>();
 
         if(ctx.check("ID") && ctx.lookahead("COLON")) {
             while(ctx.check("ID")) {
                 String key = ctx.expect("ID").value();
                 ctx.expect("COLON");
-                AST.BinaryExpression argument = (AST.BinaryExpression)binaryExpression(ctx);
+                AST.Expr argument = (AST.Expr)binaryExpression(ctx);
     
                 bob.append(key).append(":");
                 arguments.put(key, argument);
@@ -220,7 +196,7 @@ public class Parser {
     }
     
     private static AST.Expr binaryExpression(Context ctx) {
-        AST.UnaryExpression receiver = (AST.UnaryExpression)unaryExpression(ctx);
+        AST.Expr receiver = unaryExpression(ctx);
         List<AST.BinaryMessage> messages = new ArrayList<AST.BinaryMessage>();
         while(ctx.check("BINOP")) {
             messages.add(binaryMessage(ctx));
@@ -232,7 +208,7 @@ public class Parser {
     }
     
     private static AST.Expr keywordExpression(Context ctx) {
-        AST.BinaryExpression receiver = (AST.BinaryExpression)binaryExpression(ctx);
+        AST.Expr receiver = binaryExpression(ctx);
         AST.KeywordMessage message = keywordMessage(ctx);
         if(message == null) {
             return receiver;
@@ -350,14 +326,16 @@ public class Parser {
         if(ctx.accept("EXTENDING") != null) {
             parent = identifier(ctx);
         }
+        ctx.expect("IS");
         List<AST.Member> members = new ArrayList<>();
-        while(ctx.accept("END") == null) {
+        while(!ctx.check("END")) {
             AST.Member val = member(ctx);
             if(val instanceof AST.Field) {
                 ctx.error("Traits cannot contain fields.");
             }
-            members.add(member(ctx));
+            members.add(val);
         }
+        ctx.expect("END");
         return new AST.TraitDef(name, parent, members);
     }
     
@@ -377,13 +355,14 @@ public class Parser {
         }
         ctx.expect("IS");
         List<AST.Member> members = new ArrayList<>();
-        while(ctx.accept("END") == null) {
+        while(!ctx.check("END")) {
             AST.Member val = member(ctx);
             if(val instanceof AST.Requirement) {
                 ctx.error("Classes cannot contain requirements.");
             }
-            members.add(member(ctx));
+            members.add(val);
         }
+        ctx.expect("END");
         return new AST.ClassDef(name, parent, traits, members);
     }
     
@@ -400,18 +379,25 @@ public class Parser {
         AST.Identifier name = identifier(ctx);
         ctx.expect("ASSIGN");
         AST.Expr val = expression(ctx);
-        ctx.expect("PERIOD", "Statements must be ended with a period.");
         return new AST.Assignment(name, val);
     }
     
     private static AST.Stmt statement(Context ctx) {
-        if(ctx.check("ID") && ctx.lookahead("ASSIGN")) return assignment(ctx);
-        else if(ctx.check("VAR")) return tempDecl(ctx);
-        else if(ctx.check("CLASS")) return classDef(ctx);
-        else if(ctx.check("TRAIT")) return traitDef(ctx);
-        else if(ctx.check("ANSWER")) return answer(ctx);
-        else if(ctx.check("AT")) return pragma(ctx);
-        else if(ctx.check("ID") || ctx.check("LBRACE") || ctx.check("LBRACKET") || ctx.check("HASH") || ctx.check("STRING") || ctx.check("NUMBER") || ctx.check("SYMBOL") || ctx.check("TRUE") || ctx.check("FALSE") || ctx.check("NIL") || ctx.check("LPAREN")) {
+        if(ctx.check("CLASS")) {
+            return classDef(ctx);
+        } else if(ctx.check("TRAIT")) {
+            return traitDef(ctx);
+        } else if(ctx.check("VAR")) {
+            return tempDecl(ctx);
+        } else if(ctx.check("ANSWER")) {
+            return answer(ctx);
+        } else if(ctx.check("AT")) {
+            return pragma(ctx);
+        } else if(ctx.check("ID") && ctx.lookahead("ASSIGN")) {
+            AST.Assignment val = assignment(ctx);
+            ctx.expect("PERIOD", "Statements must end with a period.");
+            return val;
+        } else if(ctx.check("ID") || ctx.check("LBRACE") || ctx.check("LBRACKET") || ctx.check("HASH") || ctx.check("STRING") || ctx.check("NUMBER") || ctx.check("SYMBOL") || ctx.check("TRUE") || ctx.check("FALSE") || ctx.check("NIL") || ctx.check("LPAREN")) {
             AST.Expr val = expression(ctx);
             ctx.expect("PERIOD", "Statements must end with a period.");
             return val;

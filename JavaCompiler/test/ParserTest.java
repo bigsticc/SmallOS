@@ -21,6 +21,36 @@ public class ParserTest {
     }
 
     @Test
+    public void classTest() {
+        System.out.println("Class Parser Test:\n");
+        String input = """
+        class Test is
+            var x.
+        end
+        """;
+
+        List<Lexer.Token> tokens = Lexer.tokenize(input);
+
+        AST.Program output = Parser.parse(tokens);
+        System.out.println(output);
+    }
+
+    @Test
+    public void traitTest() {
+        System.out.println("Trait Parser Test:\n");
+        String input = """
+        trait Test is
+            require runTest.
+        end
+        """;
+
+        List<Lexer.Token> tokens = Lexer.tokenize(input);
+
+        AST.Program output = Parser.parse(tokens);
+        System.out.println(output);
+    }
+
+    @Test
     public void vectorTest() {
         System.out.println("Vector Parser Test:\n");
         String input = """
