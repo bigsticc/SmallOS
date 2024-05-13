@@ -10,15 +10,15 @@ class Vector3 implementing Arithmetic is
         result z: aZ.
     end
     
-    <getSet: x> // pragmas can invoke compiler scripts and generate code; this one generates an "x" and "x:" method.
-    <getSet: y>
-    <getSet: z>
+    @getSet: x // pragmas can invoke compiler scripts and generate code; this one generates an "x" and "x:" method.
+    @getSet: y
+    @getSet: z
 
     def length as
         ^(x squ + y squ + z squ) sqrt. 
     end
     
-    <override>
+    @override
     def + other as
         var result := Vector3 new.
         result x: x + other x.
@@ -27,7 +27,7 @@ class Vector3 implementing Arithmetic is
         ^result.
     end
     
-    <override>
+    @override
     def - other as
         var result := Vector3 new.
         result x: x - other x.
@@ -36,7 +36,7 @@ class Vector3 implementing Arithmetic is
         ^result.
     end
     
-    <override>
+    @override
     def * scalar as
         var result := Vector3 new.
         result x: x * scalar.
@@ -45,7 +45,7 @@ class Vector3 implementing Arithmetic is
         ^result.
     end
     
-    <override>
+    @override
     def / scalar as
         var result := Vector3 new.
         result x: x / scalar.
