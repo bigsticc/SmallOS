@@ -3,10 +3,12 @@ package test;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.smallos.AST;
 import com.smallos.Lexer;
 import com.smallos.Parser;
+import com.smallos.SyntaxError;
 
 public class ParserTest {
     @Test
@@ -18,6 +20,8 @@ public class ParserTest {
         List<Lexer.Token> tokens = Lexer.tokenize(input);
         AST.Program output = Parser.parse(tokens);
         System.out.println(output);
+
+        System.out.println("Test concluded.");
     }
 
     @Test
@@ -33,6 +37,8 @@ public class ParserTest {
 
         AST.Program output = Parser.parse(tokens);
         System.out.println(output);
+
+        System.out.println("Test concluded.");
     }
 
     @Test
@@ -48,6 +54,8 @@ public class ParserTest {
 
         AST.Program output = Parser.parse(tokens);
         System.out.println(output);
+
+        System.out.println("Test concluded.");
     }
 
     @Test
@@ -127,5 +135,25 @@ public class ParserTest {
 
         AST.Program output = Parser.parse(tokens);
         System.out.println(output);
+
+        System.out.println("Test concluded.");
+    }
+
+    @Test
+    public void invalidTest() {
+        System.out.println("Invalid test: ");
+        String input = """
+        class Test is
+            require invalid.
+        end
+        """;
+
+        List<Lexer.Token> tokens = Lexer.tokenize(input);
+
+        assertThrows(SyntaxError.class, () -> {
+            Parser.parse(tokens);
+        });
+
+        System.out.println("Test concluded.");
     }
 }

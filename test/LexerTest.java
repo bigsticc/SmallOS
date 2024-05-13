@@ -1,8 +1,10 @@
 package test;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.smallos.Lexer;
+import com.smallos.SyntaxError;
 
 import java.util.List;
 
@@ -18,6 +20,8 @@ public class LexerTest {
 
         String output = tokens.stream().map(tok -> tok.toString()).collect(Collectors.joining("\n"));
         System.out.println(output);
+
+        System.out.println("Test concluded.");
     }
 
     @Test
@@ -97,5 +101,17 @@ public class LexerTest {
 
         String output = tokens.stream().map(tok -> tok.toString()).collect(Collectors.joining("\n"));
         System.out.println(output);
+
+        System.out.println("Test concluded.");
+    }
+
+    @Test
+    public void invalidTest() {
+        System.out.println("Invalid test: ");
+        String input = "Transcript show: ⹇⒔℉⭲⛌⡖⩾⥂⠶⢦⣯⒏ ⰺ.";
+
+        assertThrows(SyntaxError.class, () -> Lexer.tokenize(input));
+
+        System.out.println("Test concluded.");
     }
 }
