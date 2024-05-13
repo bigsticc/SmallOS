@@ -321,7 +321,7 @@ public class Parser {
     
     private static AST.TraitDef traitDef(Context ctx) {
         ctx.expect("TRAIT");
-        String name = ctx.expect("ID").value();
+        AST.Identifier name = identifier(ctx);
         AST.Identifier parent = null;
         if(ctx.accept("EXTENDING") != null) {
             parent = identifier(ctx);
@@ -341,7 +341,7 @@ public class Parser {
     
     private static AST.ClassDef classDef(Context ctx) {
         ctx.expect("CLASS");
-        String name = ctx.expect("ID").value();
+        AST.Identifier name = identifier(ctx);
         AST.Identifier parent = null;
         if(ctx.accept("EXTENDING") != null) {
             parent = identifier(ctx);
