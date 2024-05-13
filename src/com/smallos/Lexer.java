@@ -1,8 +1,11 @@
 package com.smallos;
 import java.util.regex.*;
+import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import static java.util.Map.entry;
 
 public class Lexer {
     public static record Token(int lineNum, String type, String value) {
@@ -11,15 +14,46 @@ public class Lexer {
         }
     };
     
-    final static String regex = "(?<COMMENT>\\/\\/.*$)|(?<SYMBOL>#[a-zA-Z_$][a-zA-Z_$0-9]*)|(?<ASSIGN>:=)|(?<PERIOD>\\.)|(?<COLON>:)|(?<SEMICOLON>;)|(?<COMMA>,)|(?<HASH>#)|(?<LPAREN>\\()|(?<RPAREN>\\))|(?<LBRACKET>\\[)|(?<RBRACKET>\\])|(?<LBRACE>\\{)|(?<RBRACE>\\})|(?<ANSWER>\\^)|(?<PIPE>\\|)|(?<AT>@)|(?<STRING>\\\"(?:[^\\\"]|\\\"\\\")+\\\")|(?<BYTE>x[0-9A-Fa-f]{2})|(?<NUMBER>[-+]?\\d+(?:\\.\\d+)?)|(?<ID>[a-zA-Z_][a-zA-Z0-9_]*)|(?<BINOP>[-+/*=<>!]+)|(?<NEWLINE>\\n)|(?<SKIP>[ \\t]+)|(?<MISMATCH>.)";
-    final static Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-
+    final static List<Map.Entry<String,String>> dict = List.of(
+        entry("COMMENT", "//.*$"),
+        entry("SYMBOL", "#[a-zA-Z_$][a-zA-Z_$0-9]*"),
+        entry("ASSIGN", ":="),
+        entry("PERIOD", "\\."),
+        entry("COLON", ":"),
+        entry("SEMICOLON", ";"),
+        entry("COMMA", ","),
+        entry("HASH", "#"),
+        entry("LPAREN", "\\("),
+        entry("RPAREN", "\\)"),
+        entry("LBRACKET", "\\["),
+        entry("RBRACKET", "\\]"),
+        entry("LBRACE", "\\{"),
+        entry("RBRACE", "\\}"),
+        entry("ANSWER", "\\^"),
+        entry("PIPE", "\\|"),
+        entry("AT", "@"),
+        entry("STRING", "\"(?:[^\\\"]|\\\"\\\")+\""),
+        entry("BYTE", "x[0-9A-Fa-f]{2}"),
+        entry("NUMBER", "[-+]?\\d+(?:\\.\\d+)?"),
+        entry("ID", "[a-zA-Z_][a-zA-Z0-9_]*"),
+        entry("BINOP", "[-+/*=<>!]+"),
+        entry("NEWLINE", "\\n"),
+        entry("SKIP", "[ \\t]+"),
+        entry("MISMATCH", ".")
+    );
+    
+    final static Pattern pattern = Pattern.compile(dict.stream()
+        .map(entry -> String.format("(?<%s>%s)", entry.getKey(), entry.getValue()))
+        .collect(Collectors.joining("|")), 
+        Pattern.MULTILINE
+    );
+    final static String[] groups = dict.stream().map(entry -> entry.getKey()).toArray(String[]::new);
     final static String[] keywords = {"class", "trait", "extending", "implementing", "is", "as", "static", "var", "def", "end", "require", "true", "false", "nil"};
     
     private static String findGroupName(Matcher matcher) {
-        for (String groupName : new String[] {"COMMENT", "SYMBOL", "ASSIGN", "PERIOD", "COLON", "SEMICOLON", "COMMA", "HASH", "LPAREN", "RPAREN", "LBRACKET", "RBRACKET", "LBRACE", "RBRACE", "ANSWER", "PIPE", "AT", "STRING", "BYTE", "NUMBER", "ID", "BINOP", "NEWLINE", "SKIP", "MISMATCH"}) {
-            if (matcher.group(groupName) != null) {
-                return groupName;
+        for (String group : groups) {
+            if (matcher.group(group) != null) {
+                return group;
             }
         }
         throw new IllegalStateException("Unknown lexer state.");
