@@ -161,7 +161,7 @@ public class Parser {
             while(ctx.check("ID")) {
                 String key = ctx.expect("ID").value();
                 ctx.expect("COLON");
-                AST.Expr argument = (AST.Expr)binaryExpression(ctx);
+                AST.Expr argument = binaryExpression(ctx);
     
                 bob.append(key).append(":");
                 arguments.put(key, argument);
@@ -185,7 +185,7 @@ public class Parser {
     // Expressions
     private static AST.Expr unaryExpression(Context ctx) {
         AST.Value receiver = value(ctx);
-        List<AST.UnaryMessage> messages = new ArrayList<AST.UnaryMessage>();
+        List<AST.UnaryMessage> messages = new ArrayList<>();
         while(ctx.check("ID") && !ctx.lookahead("COLON")) {
             messages.add(unaryMessage(ctx));
         }
@@ -197,7 +197,7 @@ public class Parser {
     
     private static AST.Expr binaryExpression(Context ctx) {
         AST.Expr receiver = unaryExpression(ctx);
-        List<AST.BinaryMessage> messages = new ArrayList<AST.BinaryMessage>();
+        List<AST.BinaryMessage> messages = new ArrayList<>();
         while(ctx.check("BINOP")) {
             messages.add(binaryMessage(ctx));
         }
@@ -218,7 +218,7 @@ public class Parser {
     
     private static AST.Expr expression(Context ctx) {
         AST.Expr receiver = keywordExpression(ctx);
-        List<AST.Message> messages = new ArrayList<AST.Message>();
+        List<AST.Message> messages = new ArrayList<>();
 
         if(ctx.check("SEMICOLON")) {
             while(ctx.check("SEMICOLON")) {
@@ -348,10 +348,9 @@ public class Parser {
         }
         List<AST.Identifier> traits = new ArrayList<>();
         if(ctx.accept("IMPLEMENTING") != null) {
-            traits.add(identifier(ctx));
-            while(ctx.accept("COMMA") != null) {
+            do {
                 traits.add(identifier(ctx));
-            }
+            } while (ctx.accept("COMMA") != null);
         }
         ctx.expect("IS");
         List<AST.Member> members = new ArrayList<>();
