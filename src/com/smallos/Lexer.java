@@ -8,11 +8,11 @@ import java.util.Map;
 import static java.util.Map.entry;
 
 public class Lexer {
-    public static record Token(int lineNum, String type, String value) {
+    public record Token(int lineNum, String type, String value) {
         public String toString() {
             return String.format("(<%s> %s @ %s)", type, value, lineNum);
         }
-    };
+    }
     
     final static List<Map.Entry<String,String>> dict = List.of(
         entry("COMMENT", "//.*$"),
@@ -47,7 +47,7 @@ public class Lexer {
         .collect(Collectors.joining("|")), 
         Pattern.MULTILINE
     );
-    final static String[] groups = dict.stream().map(entry -> entry.getKey()).toArray(String[]::new);
+    final static String[] groups = dict.stream().map(Map.Entry::getKey).toArray(String[]::new);
     final static String[] keywords = {"class", "trait", "extending", "implementing", "is", "as", "static", "var", "def", "end", "require", "true", "false", "nil"};
     
     private static String findGroupName(Matcher matcher) {
@@ -68,16 +68,16 @@ public class Lexer {
             String type = findGroupName(m);
             String value = m.group();
             
-            if (type == "ID" && Arrays.asList(keywords).contains(value)) {
+            if (type.equals("ID") && Arrays.asList(keywords).contains(value)) {
                 type = value.toUpperCase();
-            } else if(type == "COMMENT") {
+            } else if(type.equals("COMMENT")) {
                 continue;
-            } else if(type == "NEWLINE") {
+            } else if(type.equals("NEWLINE")) {
                 line++;
                 continue;
-            } else if(type == "SKIP") {
+            } else if(type.equals("SKIP")) {
                 continue;
-            } else if(type == "MISMATCH") {
+            } else if(type.equals("MISMATCH")) {
                 throw new SyntaxError("Unknown character at line " + line + ":" + value);
             }
             tokens.add(new Token(line, type, value));
