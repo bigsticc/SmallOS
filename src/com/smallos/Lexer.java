@@ -67,19 +67,21 @@ public class Lexer {
         while(m.find()) {
             String type = findGroupName(m);
             String value = m.group();
-            
-            if (type.equals("ID") && Arrays.asList(keywords).contains(value)) {
-                type = value.toUpperCase();
-            } else if(type.equals("COMMENT")) {
-                continue;
-            } else if(type.equals("NEWLINE")) {
-                line++;
-                continue;
-            } else if(type.equals("SKIP")) {
-                continue;
-            } else if(type.equals("MISMATCH")) {
-                throw new SyntaxError("Unknown character at line " + line + ":" + value);
+
+            switch(type) {
+                case "ID":
+                    if(Arrays.asList(keywords).contains(value))
+                        type = value.toUpperCase();
+                    break;
+                case "NEWLINE":
+                    line++;
+                case "SKIP":
+                case "COMMENT":
+                    continue;
+                case "MISMATCH":
+                    throw new SyntaxError("Unknown character at line " + line + ":" + value);
             }
+
             tokens.add(new Token(line, type, value));
         }
         tokens.add(new Token(line, "EOF", ""));
